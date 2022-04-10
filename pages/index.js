@@ -6,6 +6,17 @@ const addToClipboard = (text) => {
   navigator.clipboard.writeText(text);
 };
 
+const removeDuplicate = (data) => {
+  const seen = new Set();
+
+  const filteredArr = data.filter((el) => {
+    const duplicate = seen.has(el.id);
+    seen.add(el.id);
+    return !duplicate;
+  });
+  return filteredArr;
+};
+
 export default function Home({ chatData }) {
   return (
     <div>
@@ -23,9 +34,11 @@ p{
         <div className="flex flex-col">
           {/* table header */}
           <div className="flex justify-between">
-            <p className="border-blue-500 border w-1/5 ">Add to clipboard</p>
-            <p className="border-blue-500 border w-1/2">Chat Id</p>
-            <p className="border-blue-500 border w-1/2">Title</p>
+            <p className="bg-blue-500 border text-white w-1/5 ">
+              Add to clipboard
+            </p>
+            <p className="bg-orange-500 border w-1/4">Chat Id</p>
+            <p className="bg-green-500 border w-[55%]">Title</p>
           </div>
           {/* table body */}
           <div className="flex flex-col">
@@ -40,8 +53,8 @@ p{
                 >
                   <BsClipboardPlus />
                 </p>
-                <p className="border-blue-500 border w-1/2">{item.id}</p>
-                <p className="border-blue-500 border w-1/2">{item.title}</p>
+                <p className="border-orange-500 border w-1/4">{item.id}</p>
+                <p className="border-green-500 border w-[55%]">{item.title}</p>
               </div>
             ))}
           </div>
@@ -62,11 +75,18 @@ export async function getStaticProps() {
           title: res.my_chat_member.chat.title,
         };
       }
+      if ("message" in res) {
+        return {
+          id: res.message.chat.id,
+          title: res.message.chat.title,
+        };
+      }
     })
     .filter((item) => item != undefined);
+  const filteredData = removeDuplicate(chatData);
   return {
     props: {
-      chatData,
+      chatData: filteredData,
     },
   };
 }
