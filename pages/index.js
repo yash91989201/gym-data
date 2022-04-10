@@ -7,10 +7,28 @@ const addToClipboard = (text) => {
   navigator.clipboard.writeText(text);
 };
 
-const removeDuplicate = (data) => {
+const filterData = (data) => {
   const seen = new Set();
+  // filter data
+  const chatData = data.result
+    .map((res) => {
+      if ("my_chat_member" in res) {
+        return {
+          id: res.my_chat_member.chat.id,
+          title: res.my_chat_member.chat.title,
+        };
+      }
+      if ("message" in res) {
+        return {
+          id: res.message.chat.id,
+          title: res.message.chat.title,
+        };
+      }
+    })
+    .filter((item) => item != undefined);
 
-  const filteredArr = data.filter((el) => {
+  // remove duplicated data
+  const filteredArr = chatData.filter((el) => {
     const duplicate = seen.has(el.id);
     seen.add(el.id);
     return !duplicate;
@@ -19,34 +37,27 @@ const removeDuplicate = (data) => {
 };
 
 export default function Home() {
+  const [isLoading, setIsLoading] = useState(false);
   const [chatData, setChatData] = useState([]);
   useEffect(() => {
-    fetch(
-      "https://api.telegram.org/bot1544271466:AAEqU36QIKtTDYGtZtbCNQkawFVl7cptc1I/getUpdates"
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        const chatData = data.result
-          .map((res) => {
-            if ("my_chat_member" in res) {
-              return {
-                id: res.my_chat_member.chat.id,
-                title: res.my_chat_member.chat.title,
-              };
-            }
-            if ("message" in res) {
-              return {
-                id: res.message.chat.id,
-                title: res.message.chat.title,
-              };
-            }
-          })
-          .filter((item) => item != undefined);
-        const filteredData = removeDuplicate(chatData);
-        setChatData(filteredData);
-      });
+    async function fetchData() {
+      setIsLoading(true);
+      const res = await fetch(
+        "https://api.telegram.org/bot1544271466:AAEqU36QIKtTDYGtZtbCNQkawFVl7cptc1I/getUpdates"
+      );
+      const data = await res.json();
+      const filteredData = filterData(data);
+      setChatData(filteredData);
+      setIsLoading(false);
+    }
+    fetchData();
   }, []);
-
+  if (isLoading)
+    return (
+      <p className=" bg-blue-600 w-40 mx-auto text-center p-3 rounded-full text-white my-60 ">
+        Loading Data
+      </p>
+    );
   return (
     <div>
       <Head>
