@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Head from "next/head";
 // import icon
 import { BsClipboardPlus } from "react-icons/bs";
@@ -17,7 +18,35 @@ const removeDuplicate = (data) => {
   return filteredArr;
 };
 
-export default function Home({ chatData }) {
+export default function Home() {
+  const [chatData, setChatData] = useState([]);
+  useEffect(() => {
+    fetch(
+      "https://api.telegram.org/bot1544271466:AAEqU36QIKtTDYGtZtbCNQkawFVl7cptc1I/getUpdates"
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        const chatData = data.result
+          .map((res) => {
+            if ("my_chat_member" in res) {
+              return {
+                id: res.my_chat_member.chat.id,
+                title: res.my_chat_member.chat.title,
+              };
+            }
+            if ("message" in res) {
+              return {
+                id: res.message.chat.id,
+                title: res.message.chat.title,
+              };
+            }
+          })
+          .filter((item) => item != undefined);
+        const filteredData = removeDuplicate(chatData);
+        setChatData(filteredData);
+      });
+  }, []);
+
   return (
     <div>
       <Head>
@@ -62,31 +91,4 @@ p{
       </main>
     </div>
   );
-}
-
-export async function getStaticProps() {
-  const res = await fetch(process.env.BOT_LINK);
-  const data = await res.json();
-  const chatData = data.result
-    .map((res) => {
-      if ("my_chat_member" in res) {
-        return {
-          id: res.my_chat_member.chat.id,
-          title: res.my_chat_member.chat.title,
-        };
-      }
-      if ("message" in res) {
-        return {
-          id: res.message.chat.id,
-          title: res.message.chat.title,
-        };
-      }
-    })
-    .filter((item) => item != undefined);
-  const filteredData = removeDuplicate(chatData);
-  return {
-    props: {
-      chatData: filteredData,
-    },
-  };
 }
