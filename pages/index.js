@@ -14,13 +14,13 @@ const filterData = (data) => {
     .map((res) => {
       if ("my_chat_member" in res) {
         return {
-          id: `,${res.my_chat_member.chat.id}`,
+          id: `${res.my_chat_member.chat.id},`,
           title: res.my_chat_member.chat.title,
         };
       }
       if ("message" in res) {
         return {
-          id: `,${res.message.chat.id}`,
+          id: `${res.message.chat.id},`,
           title: res.message.chat.title,
         };
       }
