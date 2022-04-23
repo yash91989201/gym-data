@@ -14,13 +14,13 @@ const filterData = (data) => {
     .map((res) => {
       if ("my_chat_member" in res) {
         return {
-          id: res.my_chat_member.chat.id,
+          id: `,${res.my_chat_member.chat.id}`,
           title: res.my_chat_member.chat.title,
         };
       }
       if ("message" in res) {
         return {
-          id: res.message.chat.id,
+          id: `,${res.message.chat.id}`,
           title: res.message.chat.title,
         };
       }
@@ -77,8 +77,8 @@ p{
             <p className="bg-blue-500 border text-white w-1/5 ">
               Add to clipboard
             </p>
-            <p className="bg-orange-500 border w-1/4">Chat Id</p>
-            <p className="bg-green-500 border w-[55%]">Title</p>
+            <p className="bg-orange-500 border text-white  w-1/4">Chat Id</p>
+            <p className="bg-green-500 border text-white w-[55%]">Title</p>
           </div>
           {/* table body */}
           <div className="flex flex-col">
